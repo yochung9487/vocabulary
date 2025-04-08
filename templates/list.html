@@ -1,0 +1,119 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title>單字庫列表</title>
+    <style>
+        table {
+          width: 80%;
+          margin: 20px auto;
+          border-collapse: collapse;
+        }
+        th, td {
+          border: 1px solid #ddd;
+          padding: 8px;
+          text-align: left;
+          word-wrap: break-word; /* 確保長文字自動換行 */
+          white-space: normal;  /* 允許文字換行 */
+        }
+        th {
+          background-color: #f2f2f2;
+        }
+        tr:nth-child(even) {
+          background-color: #f9f9f9;
+        }
+        tr:hover {
+          background-color: #f1f1f1;
+        }
+        .search-container {
+          display: flex;
+          justify-content: center; /* 水平置中 */
+          align-items: center;    /* 垂直置中 */
+          margin: 20px 0;         /* 上下留白 */
+        }
+        .search-container form {
+          display: flex;
+          gap: 10px; /* 搜尋框與按鈕之間的間距 */
+        }
+        .pagination {
+          text-align: center;
+          margin: 20px 0;
+        }
+        .pagination a {
+          margin: 0 5px;
+          padding: 8px 16px;
+          text-decoration: none;
+          color: white;
+          background-color: blue;
+          border-radius: 5px;
+        }
+        .pagination a:hover {
+          background-color: darkblue;
+        }
+        .pagination .active {
+          background-color: gray;
+          pointer-events: none;
+        }
+        .back-button {
+          display: inline-block;
+          margin: 20px auto;
+          padding: 15px 30px;
+          font-size: 18px;
+          color: white;
+          background-color: blue;
+          border: none;
+          border-radius: 8px;
+          cursor: pointer;
+          text-align: center;
+          text-decoration: none;
+          font-weight: bold;
+        }
+        .back-button:hover {
+          background-color: darkblue;
+        }
+    </style>
+  </head>
+  <body>
+    <h1 style="text-align: center;">單字庫列表</h1>
+    <div class="search-container">
+      <form method="post" action="/list">
+        <input type="text" name="search_word" placeholder="輸入想要搜尋單字" value="{{ search_word }}" />
+        <button type="submit">搜尋</button>
+      </form>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>單字</th>
+          <th>翻譯</th>
+          <th>詞性</th>
+          <th>例句</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for word, translation, part_of_speech, examples in words %}
+        <tr>
+          <td>{{ word }}</td>
+          <td>{{ translation }}</td>
+          <td>{{ part_of_speech }}</td>
+          <td>{{ examples.replace('\n', '<br>')|safe if examples else '無例句' }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <div class="pagination">
+      {% if page > 1 %}
+      <a href="/list?page={{ page - 1 }}&search_word={{ search_word }}">上一頁</a>
+      {% endif %}
+      {% for p in range(1, total_pages + 1) %}
+      <a href="/list?page={{ p }}&search_word={{ search_word }}" class="{{ 'active' if p == page else '' }}">{{ p }}</a>
+      {% endfor %}
+      {% if page < total_pages %}
+      <a href="/list?page={{ page + 1 }}&search_word={{ search_word }}">下一頁</a>
+      {% endif %}
+    </div>
+    <div style="text-align: center; margin-top: 30px;">
+      <a href="/" class="back-button">回到首頁</a>
+    </div>
+  </body>
+</html>

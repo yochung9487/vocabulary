@@ -1,0 +1,97 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title>單字庫</title>
+    <style>
+      /* 背景圖片設定，請根據實際圖片路徑及需求自行調整 */
+      body {
+        background: url('/static/images/nmixx.jpg') no-repeat center center fixed;
+        background-size: cover;
+        margin: 0;
+        padding: 0;
+        color: #333;
+      }
+
+      h1 {
+        font-size: 36px;
+        text-align: center;
+      }
+
+      .form-container label {
+        font-size: 20px;
+      }
+
+      .form-container input, 
+      .form-container button {
+        font-size: 16px;
+      }
+
+      a {
+        font-size: 16px;
+      }
+      
+      .form-container {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 20px;
+      }
+      
+      .form-container form {
+        margin: 10px;
+      }
+      
+      .content-wrapper {
+        background: rgba(255, 255, 255, 0.441);
+        padding: 20px;
+        border-radius: 8px;
+        max-width: 800px;
+        margin: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="content-wrapper">
+      <h1>單字庫管理</h1>
+      <div class="form-container">
+        <!-- 新增單字功能 -->
+        <form action="/add" method="post">
+          <label for="word">新增單字：</label>
+          <input type="text" name="word" id="word" required />
+          <button type="submit">加入</button>
+        </form>
+
+        <!-- 搜尋單字功能 (英文 → 中文) -->
+        <form action="/search" method="get">
+          <label for="search_word">搜尋單字：</label>
+          <input type="text" name="search_word" id="search_word" required />
+          <button type="submit">搜尋</button>
+        </form>
+
+        <!-- 中文翻譯功能 (中文 → 英文) -->
+        <form action="/search_cn" method="get">
+          <label for="search_cn_word">中文翻譯：</label>
+          <input type="text" name="search_word" id="search_cn_word" placeholder="輸入中文找單字庫的英文" required />
+          <button type="submit">搜尋</button>
+        </form>
+
+        <!-- 可用英文單字功能 (指向 search_cn_reverse) -->
+        <form action="/search_cn_reverse" method="get">
+          <label for="usable_en_word">可用英文單字：</label>
+          <input type="text" name="search_word" id="usable_en_word" placeholder="輸入中文找可用英文" required />
+          <button type="submit">搜尋</button>
+        </form>
+      </div>
+
+      <p><a href="/quiz">開始複習</a></p>
+      <p><a href="/list">查看單字庫</a></p>
+
+      <!-- 清理資料庫功能 -->
+      <div>
+        <a href="/clean" style="color: red; text-decoration: none; font-weight: bold;">整理資料庫</a>
+      </div>
+    </div>
+  </body>
+</html>

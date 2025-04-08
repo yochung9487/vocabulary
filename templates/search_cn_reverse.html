@@ -1,0 +1,48 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>中文查英文單字</title>
+  </head>
+  <body>
+    <h1>中文查英文單字</h1>
+    <form action="/search_cn_reverse" method="get">
+      <input type="text" name="search_word" placeholder="請輸入中文" value="{{ search_word or '' }}" required>
+      <button type="submit">搜尋</button>
+    </form>
+    
+    {% if results %}
+      <h2>查詢結果：</h2>
+      {% for result in results %}
+        <div>
+          <p><strong>英文單字：</strong>{{ result.english_word }}</p>
+          <p><strong>中文解釋：</strong>{{ result.chinese_explanation }}</p>
+          <p><strong>詞性：</strong>{{ result.part_of_speech }}</p>
+          <p><strong>英文定義：</strong>{{ result.definition }}</p>        
+          
+          {% if result.examples|length == 1 %}
+            <!-- 若只有一個例句則直接顯示完整句子 -->
+            <p><strong>例句：</strong>{{ result.examples[0] }}</p>
+          {% else %}
+            <!-- 若有多個例句則使用無序列表呈現 -->
+            <p><strong>例句：</strong>
+              <ul>
+                {% for example in result.examples %}
+                  <li>{{ example }}</li>
+                {% endfor %}
+              </ul>
+            </p>
+          {% endif %}
+          
+        </div>
+        <hr>
+      {% endfor %}
+    {% elif message %}
+      <p>{{ message }}</p>
+    {% else %}
+      <p>找不到相關內容。</p>
+    {% endif %}
+    
+    <p><a href="/">回首頁</a></p>
+  </body>
+</html>

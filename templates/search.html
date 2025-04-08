@@ -1,0 +1,75 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title>搜尋結果</title>
+    <style>
+      table {
+        width: 80%;
+        margin: 20px auto;
+        border-collapse: collapse;
+      }
+      th, td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+        word-wrap: break-word; /* 確保長文字自動換行 */
+        white-space: normal;  /* 允許文字換行 */
+      }
+      th {
+        background-color: #f2f2f2;
+      }
+      tr:nth-child(even) {
+        background-color: #f9f9f9;
+      }
+      tr:hover {
+        background-color: #f1f1f1;
+      }
+      .back-button {
+        display: inline-block;
+        margin: 20px auto;
+        padding: 15px 30px;
+        font-size: 18px;
+        color: white;
+        background-color: blue;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        text-align: center;
+        text-decoration: none;
+        font-weight: bold;
+      }
+      .back-button:hover {
+        background-color: darkblue;
+      }
+    </style>
+  </head>
+  <body>
+    <h1 style="text-align: center;">搜尋結果</h1>
+    {% if results %}
+    <table>
+      <thead>
+        <tr>
+          <th>翻譯</th>
+          <th>詞性</th>
+          <th>例句</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for translation, part_of_speech, examples in results %}
+        <tr>
+          <td>{{ translation }}</td>
+          <td>{{ part_of_speech }}</td>
+          <td>{{ examples.replace('\n', '<br>')|safe if examples else '無例句' }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p style="text-align: center;">{{ message }}</p>
+    {% endif %}
+    <div style="text-align: center; margin-top: 30px;">
+      <a href="/" class="back-button">回到首頁</a>
+    </div>
+  </body>
+</html>
