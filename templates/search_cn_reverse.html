@@ -18,7 +18,7 @@
           <p><strong>英文單字：</strong>{{ result.english_word }}</p>
           <p><strong>中文解釋：</strong>{{ result.chinese_explanation }}</p>
           <p><strong>詞性：</strong>{{ result.part_of_speech }}</p>
-          <p><strong>英文定義：</strong>{{ result.definition }}</p>        
+          <p><strong>英文定義：</strong>{{ result.definition }}</p>       
           
           {% if result.examples|length == 1 %}
             <!-- 若只有一個例句則直接顯示完整句子 -->
@@ -33,7 +33,7 @@
               </ul>
             </p>
           {% endif %}
-          
+          <p><strong>句子翻譯：</strong>{{ result.example_translation }}</p>   
         </div>
         <hr>
       {% endfor %}

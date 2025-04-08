@@ -151,13 +151,18 @@ def auto_lookup_reverse(chinese_word):
                         examples = [raw_example]
                 else:
                     examples = ["無例句"]
+
+                # 6. 抓取例句的中文解釋：從 <span class="trans dtrans dtrans-zh"> 中取得
+                ex_translation_elem = entry.find("span", class_="dtrans-eg-transzh lmr-10 hdb")
+                example_translation = ex_translation_elem.text.strip() if ex_translation_elem else "無例句中文解釋"
                 
                 results.append({
                     'english_word': english_word,
                     'part_of_speech': part_of_speech,
                     'definition': definition,
                     'chinese_explanation': chinese_explanation,
-                    'examples': examples
+                    'examples': examples,
+                    'example_translation': example_translation
                 })
             
             return results
