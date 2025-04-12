@@ -31,6 +31,7 @@ def add():
 
 @app.route("/search", methods=["GET"])
 def search():
+    clean_database()  # 在執行查詢前清理資料庫
     search_word = request.args.get("search_word", "").strip()
     if search_word:
         conn = sqlite3.connect("vocabulary.db")
@@ -78,8 +79,7 @@ def search_cn_reverse():
     return render_template("search_cn_reverse.html", search_word=None, results=None, message="請輸入要查詢的中文內容！")
 
 @app.route("/clean", methods=["GET"])
-def clean():
-    def clean_database():
+def clean_database():
         conn = sqlite3.connect("vocabulary.db")
         cursor = conn.cursor()
         
@@ -102,13 +102,10 @@ def clean():
         conn.commit()
         conn.close()
 
-    clean_database()  # 呼叫清理資料庫的函式
-
-    # 渲染 clean.html 模板
-    return render_template("clean.html")
-
 @app.route("/list", methods=["GET", "POST"])
 def list_words():
+    clean_database()  # 在執行查詢前清理資料庫
+
     search_word = request.form.get("search_word", "").strip() if request.method == "POST" else request.args.get("search_word", "").strip()
     page = int(request.args.get("page", 1))  # 獲取當前頁碼，默認為第 1 頁
     per_page = 20  # 每頁顯示的單字數量
