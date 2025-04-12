@@ -102,6 +102,7 @@ def clean_database():
         conn.commit()
         conn.close()
 
+
 @app.route("/list", methods=["GET", "POST"])
 def list_words():
     clean_database()  # 在執行查詢前清理資料庫
