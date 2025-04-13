@@ -1,8 +1,9 @@
 from flask import Flask, render_template, request, redirect, url_for
 from database import create_db, save_words
 from lookup import auto_lookup, auto_lookup_reverse
-
+import random
 import sqlite3
+from flask import request
 
 app = Flask(__name__)
 
@@ -154,10 +155,116 @@ def list_words():
 def quiz():
     conn = sqlite3.connect("vocabulary.db")
     cursor = conn.cursor()
-    cursor.execute("SELECT word, translation FROM vocabulary ORDER BY RANDOM() LIMIT 10")
+    
+    # 隨機選取 5 個單字，每個單字只出現一次
+    cursor.execute("""
+        SELECT word, translation, part_of_speech, examples 
+        FROM vocabulary 
+        ORDER BY RANDOM() LIMIT 5
+    """)
     words = cursor.fetchall()
+
+    # 為每個單字生成選擇題選項
+    quiz_data = []
+    for word, correct_translation, part_of_speech, examples in words:
+        # 過濾例句中的中文翻譯，僅保留英文部分
+        if examples:
+            examples = "\n".join([line for line in examples.split("\n") if not any('\u4e00' <= char <= '\u9fff' for char in line)])
+
+        # 隨機選取其他翻譯作為干擾選項
+        cursor.execute("""
+            SELECT DISTINCT translation 
+            FROM vocabulary 
+            WHERE translation != ? 
+            ORDER BY RANDOM() LIMIT 3
+        """, (correct_translation,))
+        distractors = [row[0] for row in cursor.fetchall()]
+        
+        # 確保選項中只有一個正確答案
+        options = distractors + [correct_translation]
+        random.shuffle(options)  # 隨機排列選項
+        
+        # 添加題目數據
+        quiz_data.append({
+            "word": word,
+            "options": options,
+            "answer": correct_translation,
+            "part_of_speech": part_of_speech,
+            "examples": examples
+        })
+
     conn.close()
-    return render_template("quiz.html", words=words)
+    return render_template("quiz.html", quiz_data=quiz_data)
+
+@app.route('/quiz_result', methods=['POST'])
+def quiz_result():
+    try:
+        num_questions = int(request.form.get("num_questions", 0))
+    except ValueError:
+        num_questions = 0
+
+    results = []
+    for i in range(num_questions):
+        word = request.form.get(f"word_{i}", "")
+        examples = request.form.get(f"examples_{i}", "")
+        user_answer = request.form.get(f"answer_{i}", "")
+        correct_answer = request.form.get(f"correct_answer_{i}", "")
+        results.append({
+            "word": word,
+            "examples": examples,
+            "user_answer": user_answer,
+            "correct_answer": correct_answer
+        })
+
+    return render_template("quiz_result.html", results=results)
+
+@app.route("/retry_quiz", methods=["POST"])
+def retry_quiz():
+    retry_words = request.form.getlist("retry_word")
+    if not retry_words:
+        return redirect("/quiz")
+
+    conn = sqlite3.connect("vocabulary.db")
+    cursor = conn.cursor()
+    quiz_data = []
+
+    for word in retry_words:
+        cursor.execute("""
+            SELECT word, translation, part_of_speech, examples 
+            FROM vocabulary 
+            WHERE word = ? 
+            ORDER BY RANDOM() LIMIT 1
+        """, (word,))
+        word_data = cursor.fetchone()
+        if not word_data:
+            continue
+        word, correct_translation, part_of_speech, examples = word_data
+        if examples:
+            examples = "\n".join([line for line in examples.split("\n") if not any('\u4e00' <= char <= '\u9fff' for char in line)])
+
+        cursor.execute("""
+            SELECT DISTINCT translation 
+            FROM vocabulary 
+            WHERE translation != ? 
+            ORDER BY RANDOM() LIMIT 3
+        """, (correct_translation,))
+        distractors = [row[0] for row in cursor.fetchall()]
+        options = distractors + [correct_translation]
+        random.shuffle(options)
+
+        quiz_data.append({
+            "word": word,
+            "options": options,
+            "answer": correct_translation,
+            "part_of_speech": part_of_speech,
+            "examples": examples
+        })
+
+    conn.close()
+    return render_template("quiz.html", quiz_data=quiz_data)
+
+if __name__ == '__main__':
+    app.run(debug=True)
 
 if __name__ == "__main__":
     create_db()

@@ -1,0 +1,161 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title>Quiz 結果</title>
+    <style>
+      /* 全局樣式 */
+      body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: #f5f5f5;
+        margin: 0;
+        padding: 20px;
+        color: #333;
+      }
+      .container {
+        max-width: 900px;
+        margin: auto;
+        background: #fff;
+        padding: 20px 30px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+      h1 {
+        text-align: center;
+        margin-bottom: 30px;
+      }
+      /* 表格樣式 */
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 30px;
+      }
+      th, td {
+        padding: 12px;
+        border-bottom: 1px solid #ddd;
+        text-align: center;
+      }
+      th {
+        background-color: #009879;
+        color: #fff;
+        text-transform: uppercase;
+        font-size: 14px;
+      }
+      tr:hover {
+        background-color: #f1f1f1;
+      }
+      .correct {
+        color: #28a745;
+        font-size: 1.4em;
+      }
+      .incorrect {
+        color: #dc3545;
+        font-size: 1.4em;
+      }
+      .summary {
+        font-size: 1.2em;
+        text-align: center;
+        margin-bottom: 30px;
+      }
+      /* 錯題練習區塊 */
+      .wrong-section {
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        padding: 15px;
+        margin-bottom: 30px;
+      }
+      .wrong-section h2 {
+        margin-top: 0;
+        color: #dc3545;
+      }
+      .wrong-section ul {
+        list-style: none;
+        padding: 0;
+      }
+      .wrong-section li {
+        margin-bottom: 15px;
+        padding: 10px;
+        border-bottom: 1px solid #eee;
+      }
+      /* 按鈕 */
+      .btn {
+        background: #009879;
+        color: #fff;
+        padding: 10px 20px;
+        text-decoration: none;
+        border-radius: 5px;
+        display: inline-block;
+        margin: auto;
+      }
+      .btn:hover {
+        background: #007a63;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Quiz 結果</h1>
+      <table>
+        <thead>
+          <tr>
+            <th>題號</th>
+            <th>單字</th>
+            <th>例句</th>
+            <th>你的答案</th>
+            <th>正確答案</th>
+            <th>結果</th>
+          </tr>
+        </thead>
+        <tbody>
+          {# 使用 namespace 累計分數與收集錯題 #}
+          {% set ns = namespace(score=0, wrong=[]) %}
+          {% for result in results %}
+            {% set q_number = loop.index %}
+            {% if result.user_answer|trim|lower == result.correct_answer|trim|lower %}
+              {% set outcome = '✓' %}
+              {% set ns.score = ns.score + 1 %}
+              {% set result_class = 'correct' %}
+            {% else %}
+              {% set outcome = '✖' %}
+              {% set result_class = 'incorrect' %}
+              {# 將錯題依序加入錯題陣列 #}
+              {% set ns.wrong = ns.wrong + [result] %}
+            {% endif %}
+            <tr>
+              <td>{{ q_number }}</td>
+              <td>{{ result.word }}</td>
+              <td>{{ result.examples }}</td>
+              <td>{{ result.user_answer }}</td>
+              <td>{{ result.correct_answer }}</td>
+              <td class="{{ result_class }}">{{ outcome }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <div class="summary">
+        你總共得到 <strong>{{ ns.score }}</strong> 分 (共 {{ results|length }} 題)
+      </div>
+
+      {% if ns.wrong|length > 0 %}
+      <div class="wrong-section">
+        <h2>錯題練習</h2>
+        <ul>
+          {% for wrong in ns.wrong %}
+            <li>
+              <strong>單字:</strong> {{ wrong.word }} <br>
+              <strong>例句:</strong> {{ wrong.examples }} <br>
+              <strong>正確答案:</strong> {{ wrong.correct_answer }} <br>
+              <strong>你的答案:</strong> {{ wrong.user_answer }}
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+
+      <div style="text-align: center;">
+        <a href="/" class="btn">回到首頁</a>
+      </div>
+    </div>
+  </body>
+</html>
